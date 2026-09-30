@@ -1,0 +1,1 @@
+# notepadpp-KorEng-tts-plugin
