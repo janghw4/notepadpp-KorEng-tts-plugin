@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.obj
+*.exp
+*.lib
+*.pdb
+*.res
+/dist/
+/AGENTS.md
+/verification.json
+.vs/
