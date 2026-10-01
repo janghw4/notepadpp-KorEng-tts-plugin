@@ -1,4 +1,4 @@
-# Selection TTS for Notepad++
+# Korean-English TTS plugin for Notepad++
 
 선택한 영어는 영어 음성으로, 한국어는 한국어 음성으로 읽는 x64 Notepad++ 플러그인.
 Windows에 설치된 SAPI 음성을 사용한다. 이 컴퓨터에서는 영어 Zira와 한국어 Heami를 확인했다.
@@ -11,22 +11,27 @@ Windows Narrator에 표시되는 음성이라도 classic SAPI에서 사용할 �
 
 ## 설치
 
-1. [최신 릴리스](https://github.com/janghw4/notepadpp-KorEng-tts-plugin/releases/latest)의 `selection_tts_x64.zip`을 내려받아 압축을 푼다.
+1. [최신 릴리스](https://github.com/janghw4/notepadpp-KorEng-tts-plugin/releases/latest)의 `KorEngTTS_x64.zip`을 내려받아 압축을 푼다.
 2. 작업을 저장하고 Notepad++를 닫는다.
 3. `install.cmd`를 실행한다. `Program Files`에 설치했다면 마우스 오른쪽 버튼으로 눌러 **관리자 권한으로 실행**한다.
 4. Notepad++를 실행한 뒤 텍스트를 선택하고 **Ctrl+Alt+T**를 누른다.
 
-수동 설치: `dist/SelectionTTS/SelectionTTS.dll`을 Notepad++ 설치 폴더의
-`plugins/SelectionTTS/SelectionTTS.dll`에 복사하고 Notepad++를 다시 실행한다.
+수동 설치: `dist/KorEngTTS/KorEngTTS.dll`을 Notepad++ 설치 폴더의
+`plugins/KorEngTTS/KorEngTTS.dll`에 복사하고 Notepad++를 다시 실행한다.
 포터블 버전은 `analysis/install.ps1 -NotepadDirectory '포터블 폴더'`로 설치할 수 있다.
 GitHub의 소스 ZIP에는 DLL이 없으므로 먼저 빌드해야 한다. 릴리스 ZIP에는 DLL과 전체 소스가 들어 있다.
 설치 프로그램은 기존 SpeechPlugin이나 편집 중인 문서를 변경하지 않으며 앱을 종료하지 않는다.
 같은 파일은 재설치하지 않는다. 확인된 이전 버전은 로컬 백업을 보존한 뒤 업데이트하며,
 알 수 없는 DLL이 있으면 중단한다. 실행 중인 Notepad++의 DLL은 덮어쓰지 않는다.
 
+기존 Selection TTS에서 업데이트할 때도 설치 프로그램을 사용한다. 확인된 이전
+`plugins/SelectionTTS/SelectionTTS.dll`은 `%LOCALAPPDATA%\KorEngTTS\backups`로 옮겨 보존하며,
+KorEng TTS 메뉴만 표시되도록 한다. 첫 실행에서 `KorEngTTS.ini`가 없으면 `SelectionTTS.ini`를
+복사해 속도와 정규식 설정을 이어받는다. 기존 설정 파일과 이미 있는 새 설정은 덮어쓰지 않는다.
+
 ## 사용
 
-메뉴: **Plugins → Selection TTS**
+메뉴: **Plugins → KorEng TTS**
 
 | 명령 | 단축키 | 동작 |
 |---|---|---|
@@ -56,7 +61,7 @@ Windows SAPI의 영어(미국)·한국어 음성이 필요하다. 음성이 없�
 
 ## 슬라이더로 속도 조절
 
-**Plugins → Selection TTS → Speech speed (slider)...**를 연다.
+**Plugins → KorEng TTS → Speech speed (slider)...**를 연다.
 슬라이더를 왼쪽으로 움직이면 느려지고 오른쪽으로 움직이면 빨라진다.
 범위는 Windows 음성의 `-10`부터 `10`까지이며, `0`이 기본 속도다.
 배속이나 분당 단어 수를 나타내는 값은 아니다.
@@ -68,7 +73,7 @@ Windows SAPI의 영어(미국)·한국어 음성이 필요하다. 음성이 없�
 
 ## 정규식 필터 설정
 
-**Plugins → Selection TTS → Text filters (regex)...**를 열고 한 줄에 정규식 하나씩 입력한다.
+**Plugins → KorEng TTS → Text filters (regex)...**를 열고 한 줄에 정규식 하나씩 입력한다.
 입력한 정규식과 일치하는 내용은 읽기 전에 제외한다. 문서에는 원문이 그대로 남는다.
 
 기본값:
@@ -92,6 +97,7 @@ Windows, Visual Studio C++ Build Tools, Windows SDK가 필요하다. ATL과 별�
 ```powershell
 .\analysis\build.ps1
 .\analysis\test.ps1 -CoreOnly
+.\analysis\test_install.ps1
 .\analysis\package.ps1
 # 영어·한국어 SAPI 음성과 오디오 출력이 준비된 환경에서:
 .\analysis\test.ps1
@@ -102,7 +108,9 @@ python .\analysis\test_notepad.py --portable-dir '공식 x64 포터블 패키지
 사용자의 열린 문서를 읽거나 수정하지 않는다. 통합 테스트는 짧은 테스트 음성을 재생할 수 있다.
 자동 빌드는 `-CoreOnly`로 선택 영역·문자 인코딩·언어 구간·정규식·설정 저장을 검사한다.
 이 검사는 음성과 오디오 장치가 필요 없으며, 실제 음성 합성과 편집기 창 검증은 별도로 실행한다.
-`package.ps1`은 `dist/releases/selection_tts_x64.zip`과 SHA-256 파일을 만든다.
+설치 검사는 임시 폴더의 합성 설치 경로만 사용하고 편집기를 실행하지 않는다.
+`test_install.ps1 -LegacyDll '이전 DLL 경로'`로 확인된 Selection TTS 바이너리에서의 업데이트도 검사할 수 있다.
+`package.ps1`은 `dist/releases/KorEngTTS_x64.zip`과 SHA-256 파일을 만든다.
 기존 ZIP이 있으면 중단하므로 재생성할 때는 `-OutputDirectory '빈 폴더'`를 지정한다.
 기본 오디오 장치를 사용할 수 없으면 `test.ps1 -AudioOutputIndex <번호>`로
 테스트 음성에만 다른 출력 장치를 지정할 수 있다. Windows의 기본 출력 설정은 바꾸지 않는다.

@@ -9,7 +9,7 @@
 
 using namespace selection_tts;
 namespace {
-constexpr wchar_t plugin_name[] = L"Selection TTS";
+constexpr wchar_t plugin_name[] = L"KorEng TTS";
 NppData npp{};
 std::unique_ptr<SpeechEngine> speech;
 bool com_owned = false;
@@ -90,7 +90,7 @@ INT_PTR CALLBACK filters_dialog_proc(HWND dialog, UINT message, WPARAM wparam, L
                 auto candidate = make_speech_filters(IsDlgButtonChecked(dialog, IDC_FILTER_ENABLE) == BST_CHECKED, text);
                 save_speech_filters(candidate);
                 filters = std::move(candidate);
-                status(filters.enabled ? L"Selection TTS: text filters saved" : L"Selection TTS: text filters disabled");
+                status(filters.enabled ? L"KorEng TTS: text filters saved" : L"KorEng TTS: text filters disabled");
                 EndDialog(dialog, IDOK);
                 return TRUE;
             }
@@ -144,24 +144,24 @@ void speak_selection(Language language) {
         text = prepare_speech_text(text, filters);
         if (text.find_first_not_of(L" \t\r\n") == std::wstring::npos) {
             if (speech) speech->stop();
-            status(L"Selection TTS: nothing to read after skipping symbols");
+            status(L"KorEng TTS: nothing to read after skipping symbols");
             return;
         }
         engine().speak(text, language);
-        status(L"Selection TTS: speaking selection");
+        status(L"KorEng TTS: speaking selection");
     });
 }
 void speak_auto() { speak_selection(Language::Auto); }
 void speak_english() { speak_selection(Language::English); }
 void speak_korean() { speak_selection(Language::Korean); }
-void stop() { guarded([] { if (speech) speech->stop(); status(L"Selection TTS: stopped"); }); }
-void pause_resume() { guarded([] { if (speech) { speech->toggle_pause(); status(speech->paused() ? L"Selection TTS: paused" : L"Selection TTS: resumed"); } }); }
+void stop() { guarded([] { if (speech) speech->stop(); status(L"KorEng TTS: stopped"); }); }
+void pause_resume() { guarded([] { if (speech) { speech->toggle_pause(); status(speech->paused() ? L"KorEng TTS: paused" : L"KorEng TTS: resumed"); } }); }
 void apply_rate(int value, bool save) {
     current_rate = std::clamp(value, -10, 10);
     if (speech) speech->set_rate(current_rate);
     if (save && !config_path.empty() && !WritePrivateProfileStringW(L"Speech", L"Rate", std::to_wstring(current_rate).c_str(), config_path.c_str()))
         throw std::runtime_error("Speed changed for this session, but the settings file could not be saved.");
-    status(L"Selection TTS: speed " + std::to_wstring(current_rate) + L" (-10 to 10)");
+    status(L"KorEng TTS: speed " + std::to_wstring(current_rate) + L" (-10 to 10)");
 }
 void change_rate(int value) { guarded([&] { apply_rate(value, true); }); }
 void slower() { change_rate(current_rate - 1); }
@@ -236,7 +236,7 @@ void edit_speech_speed() {
 }
 void about() {
     guarded([] {
-        std::wstring info = L"Selection TTS 1.3\n\nSelect text, then press Ctrl+Alt+T.\nAuto switches between English and Korean letter runs.\nAdjust speed in Speech speed (slider).\nConfigure skipped text in Text filters (regex).\n\nPause / resume: Ctrl+Alt+P\nStop: Ctrl+Alt+Shift+T\n\nWindows SAPI voices (offline):\n";
+        std::wstring info = L"Korean-English TTS plugin for Notepad++\nKorEng TTS 1.3.1\n\nSelect text, then press Ctrl+Alt+T.\nAuto switches between English and Korean letter runs.\nAdjust speed in Speech speed (slider).\nConfigure skipped text in Text filters (regex).\n\nPause / resume: Ctrl+Alt+P\nStop: Ctrl+Alt+Shift+T\n\nWindows SAPI voices (offline):\n";
         for (auto language : {Language::English, Language::Korean}) {
             try { info += voice_name(language) + L"\n"; }
             catch (...) { info += language == Language::Korean ? L"Korean: not installed\n" : L"English (US): not installed\n"; }
@@ -291,7 +291,13 @@ extern "C" __declspec(dllexport) void setInfo(NppData data) {
         filters = make_speech_filters(true, default_filter_regex);
         wchar_t path[MAX_PATH]{};
         if (SendMessageW(npp._nppHandle, NPPM_GETPLUGINSCONFIGDIR, MAX_PATH, reinterpret_cast<LPARAM>(path)) && path[0]) {
-            config_path = std::wstring(path) + L"\\SelectionTTS.ini";
+            config_path = std::wstring(path) + L"\\KorEngTTS.ini";
+            const auto legacy_path = std::wstring(path) + L"\\SelectionTTS.ini";
+            if (GetFileAttributesW(config_path.c_str()) == INVALID_FILE_ATTRIBUTES &&
+                GetFileAttributesW(legacy_path.c_str()) != INVALID_FILE_ATTRIBUTES) {
+                if (!CopyFileW(legacy_path.c_str(), config_path.c_str(), TRUE) && GetLastError() != ERROR_FILE_EXISTS)
+                    throw std::runtime_error("The existing Selection TTS settings could not be copied to KorEng TTS.");
+            }
             wchar_t rate[16]{};
             GetPrivateProfileStringW(L"Speech", L"Rate", L"0", rate, 16, config_path.c_str());
             current_rate = std::clamp(_wtoi(rate), -10, 10);

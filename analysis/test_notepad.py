@@ -125,7 +125,7 @@ def wait_closed(pid, dialog):
 
 
 def filter_config(target):
-    path = target / 'plugins' / 'Config' / 'SelectionTTS.ini'
+    path = target / 'plugins' / 'Config' / 'KorEngTTS.ini'
     config = configparser.ConfigParser(interpolation=None)
     config.read(path, encoding='utf-8-sig')
     return config
@@ -140,7 +140,7 @@ def test_filter_window(pid, main_window, command, target):
     set_control_text(editor, '[')
     assert control_text(editor) == '[', 'The regex editor did not accept the test input'
     user.PostMessageW(dialog, 0x111, 1, 0)
-    error = wait_dialog(pid, 'Selection TTS', excluded=dialog)
+    error = wait_dialog(pid, 'KorEng TTS', excluded=dialog)
     assert any('Invalid regular expression on line 1' in window_text(w) for w in children(error))
     buttons = [w for w in children(error) if class_name(w) == 'Button']
     assert buttons, [(class_name(w), user.GetDlgCtrlID(w), window_text(w)) for w in children(error)]
@@ -218,9 +218,9 @@ def main():
     target = Path(tempfile.mkdtemp(prefix='selection-tts-notepad-'))
     shutil.copytree(args.portable_dir, target, dirs_exist_ok=True)
     (target / 'doLocalConf.xml').write_bytes(b'')
-    plugins = target / 'plugins' / 'SelectionTTS'
+    plugins = target / 'plugins' / 'KorEngTTS'
     plugins.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(ROOT / 'dist' / 'SelectionTTS' / 'SelectionTTS.dll', plugins)
+    shutil.copy2(ROOT / 'dist' / 'KorEngTTS' / 'KorEngTTS.dll', plugins)
     text = 'DO NOT READ THIS PREFIX.\n**Selected English sentence.**[12]\n**선택한 한국어 문장입니다.**[123]\nDO NOT READ THIS SUFFIX.\n'
     fixture = target / 'selection_fixture.txt'
     fixture.write_text(text, encoding='utf-8-sig', newline='\n')
@@ -241,11 +241,11 @@ def main():
         plugin = None
         while time.monotonic() < deadline:
             items = list(flatten(menu_items(user.GetMenu(main_window))))
-            plugin = next((item for item in items if item['label'].replace('&', '') == 'Selection TTS'), None)
+            plugin = next((item for item in items if item['label'].replace('&', '') == 'KorEng TTS'), None)
             if plugin:
                 break
             time.sleep(.1)
-        assert plugin, f'Selection TTS menu was not loaded: {[item["label"] for item in items]}'
+        assert plugin, f'KorEng TTS menu was not loaded: {[item["label"] for item in items]}'
         commands = {item['label'].split('\t')[0]: item['id'] for item in plugin['children'] if item['label']}
         assert len(commands) == 11, commands
         deadline = time.monotonic() + 5

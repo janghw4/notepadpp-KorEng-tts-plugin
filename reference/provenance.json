@@ -2,7 +2,7 @@
   "referenceRepository": "https://github.com/chcg/SpeechPlugin",
   "referenceCommit": "0f4b7beb9c6ee6399bfe42d9ab986cac72b370a5",
   "downloadedAt": "2026-09-30T18:51:12.8080043-04:00",
-  "implementation": "Independent SelectionTTS implementation using the upstream Notepad++ API headers",
+  "implementation": "Independent KorEng TTS implementation using the upstream Notepad++ API headers",
   "files": {
     "Notepad_plus_msgs.h": "9506cdd5ad846d88c6384c1c6471cd31df888d53526d3dd4f81f7720ab013b7b",
     "PluginInterface.h": "b794c1d4acf680f0b6ec673f82383a361aaef459c157b6518390452485904654",

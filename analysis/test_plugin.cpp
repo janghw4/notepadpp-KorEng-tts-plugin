@@ -139,12 +139,24 @@ int wmain(int argc, wchar_t** argv) {
         WNDCLASSW wc{};
         wc.lpfnWndProc = host_proc;
         wc.hInstance = GetModuleHandleW(nullptr);
-        wc.lpszClassName = L"SelectionTtsSyntheticEditor";
+        wc.lpszClassName = L"KorEngTtsSyntheticEditor";
         require(RegisterClassW(&wc) != 0, "Cannot register test window");
         HWND main = CreateWindowW(wc.lpszClassName, L"", 0, 0, 0, 0, 0, HWND_MESSAGE, nullptr, wc.hInstance, nullptr);
         HWND first = CreateWindowW(wc.lpszClassName, L"", 0, 0, 0, 0, 0, HWND_MESSAGE, nullptr, wc.hInstance, nullptr);
         HWND second = CreateWindowW(wc.lpszClassName, L"", 0, 0, 0, 0, 0, HWND_MESSAGE, nullptr, wc.hInstance, nullptr);
+        const auto legacy_path = test_directory + L"\\SelectionTTS.ini";
+        config_path = legacy_path;
+        const auto legacy_filters = make_speech_filters(false, L"#\\d+\n주석\n  spaced  \n\"quoted\"");
+        save_speech_filters(legacy_filters);
+        if (!WritePrivateProfileStringW(L"Speech", L"Rate", L"3", legacy_path.c_str())) throw std::runtime_error("Cannot create legacy test settings.");
+        config_path.clear();
         setInfo({main, first, second});
+        require(std::wstring(getName()) == L"KorEng TTS", "The public plugin name was not updated");
+        require(config_path == test_directory + L"\\KorEngTTS.ini", "The new settings filename is incorrect");
+        require(current_rate == 3 && !filters.enabled && filters.patterns == legacy_filters.patterns, "Legacy speed and Unicode regex settings did not migrate");
+        require(std::filesystem::exists(legacy_path), "Migration removed the original settings");
+        filters = make_speech_filters(true, default_filter_regex);
+        save_speech_filters(filters);
         require(com_ready, "COM did not initialize");
         require(isUnicode() == TRUE, "Plugin is not Unicode");
         int count = 0;
@@ -212,7 +224,7 @@ int wmain(int argc, wchar_t** argv) {
 
         selected_bytes = "***[12]*";
         speak_auto();
-        require(!speech && last_status == L"Selection TTS: nothing to read after skipping symbols", "Markers-only selection did not stop quietly");
+        require(!speech && last_status == L"KorEng TTS: nothing to read after skipping symbols", "Markers-only selection did not stop quietly");
         ComPtr<ISpStream> stream;
         if (!core_only) {
             std::wcout << L"English voice: " << voice_name(Language::English) << L"\n";
@@ -268,6 +280,10 @@ int wmain(int argc, wchar_t** argv) {
         require(!speech && !com_ready, "Shutdown did not release speech and COM");
         if (stream) check(stream->Close(), "Close controls WAV");
         stream.Reset();
+        setInfo({main, first, second});
+        require(current_rate == -10 && filters.expressions.empty(), "Existing KorEng TTS settings were replaced with legacy values");
+        require(GetPrivateProfileIntW(L"Speech", L"Rate", 0, legacy_path.c_str()) == 3, "Saving new settings changed the legacy file");
+        beNotified(&shutdown);
         require(full_document_reads == 0, "Plugin attempted to read the complete document");
         DestroyWindow(first); DestroyWindow(second); DestroyWindow(main);
         std::cout << "PASS: " << assertions << " checks; "

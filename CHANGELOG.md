@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.1 (2026-09-30)
+
+- Set the full name to Korean-English TTS plugin for Notepad++ and the menu name to KorEng TTS.
+- Rename the binary to `KorEngTTS.dll`, the plugin directory to `KorEngTTS`, and the release ZIP to `KorEngTTS_x64.zip`.
+- Archive recognized Selection TTS binaries when upgrading and preserve the original settings while copying them to `KorEngTTS.ini`.
+
+Validation: 56 core checks, 90 full native checks, 16 checks in an isolated Notepad++ instance, and 8 installer checks including upgrade from the released 1.3.0 DLL passed locally.
+
 ## 1.3.0 (2026-09-30)
 
 First GitHub release.

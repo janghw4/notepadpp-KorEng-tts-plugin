@@ -1,8 +1,8 @@
-# Selection TTS for Notepad++
+# Korean-English TTS plugin for Notepad++
 
 [한국어 안내](README.ko.md) | [Download](https://github.com/janghw4/notepadpp-KorEng-tts-plugin/releases/latest)
 
-Read selected English and Korean text with the matching Windows voice. Selection TTS is an x64 Notepad++ plugin that uses local Windows SAPI voices.
+Read selected English and Korean text with the matching Windows voice. KorEng TTS is an x64 Notepad++ plugin that uses local Windows SAPI voices.
 
 Select text such as `**Hello.**[1] 안녕하세요.` and press **Ctrl+Alt+T**. The plugin skips the asterisks and numeric reference, reads English with an English voice, and switches to Korean for the Hangul text. The document stays unchanged.
 
@@ -11,16 +11,16 @@ Select text such as `**Hello.**[1] 안녕하세요.` and press **Ctrl+Alt+T**. T
 - Windows with x64 Notepad++. The binary does not support 32-bit or ARM64 Notepad++.
 - English (US) and Korean voices available through classic Windows SAPI. The plugin looks for language IDs `409` and `412`.
 
-The release was tested with Notepad++ 8.9.8.1, Microsoft Zira, and Microsoft Heami. Other versions and voice engines have not been verified. A voice listed in Windows Narrator may not be available to classic SAPI. **Plugins → Selection TTS → Voices and help** shows the voices the plugin can find.
+The release was tested with Notepad++ 8.9.8.1, Microsoft Zira, and Microsoft Heami. Other versions and voice engines have not been verified. A voice listed in Windows Narrator may not be available to classic SAPI. **Plugins → KorEng TTS → Voices and help** shows the voices the plugin can find.
 
 ## Install
 
-1. Download `selection_tts_x64.zip` from the [latest release](https://github.com/janghw4/notepadpp-KorEng-tts-plugin/releases/latest) and extract it.
+1. Download `KorEngTTS_x64.zip` from the [latest release](https://github.com/janghw4/notepadpp-KorEng-tts-plugin/releases/latest) and extract it.
 2. Save your work and close Notepad++.
 3. Run `install.cmd`. If Notepad++ is under `Program Files`, right-click the file and choose **Run as administrator**.
 4. Open Notepad++, select text, and press **Ctrl+Alt+T**.
 
-For manual installation, copy `dist/SelectionTTS/SelectionTTS.dll` into `<Notepad++ folder>/plugins/SelectionTTS/SelectionTTS.dll`, then open Notepad++.
+For manual installation, copy `dist/KorEngTTS/KorEngTTS.dll` into `<Notepad++ folder>/plugins/KorEngTTS/KorEngTTS.dll`, then open Notepad++.
 
 For a portable installation, run this command from the extracted package:
 
@@ -28,13 +28,15 @@ For a portable installation, run this command from the extracted package:
 .\analysis\install.ps1 -NotepadDirectory 'C:\Apps\Notepad++'
 ```
 
-The installer checks the architecture and file hash. It backs up recognized earlier binaries under `%LOCALAPPDATA%\SelectionTTS\backups` before updating. It refuses to replace an unknown DLL or a DLL that Notepad++ has loaded. It does not close the editor or replace SpeechPlugin.
+The installer checks the architecture and file hash. It backs up recognized earlier binaries under `%LOCALAPPDATA%\KorEngTTS\backups` before updating. It refuses to replace an unknown DLL or a DLL that Notepad++ has loaded. It does not close the editor or replace SpeechPlugin.
+
+If you used Selection TTS, run the installer to upgrade. It archives the recognized `plugins/SelectionTTS/SelectionTTS.dll` so only KorEng TTS loads. On first startup, KorEng TTS copies `SelectionTTS.ini` to `KorEngTTS.ini` if the new file does not exist. It preserves the old settings and never replaces an existing new settings file.
 
 The ZIP includes the DLL, installer, complete corresponding source, and licenses. A GitHub source download contains source only; build it before running the installer.
 
 ## Use
 
-Open **Plugins → Selection TTS**.
+Open **Plugins → KorEng TTS**.
 
 | Command | Shortcut | Action |
 | --- | --- | --- |
@@ -80,12 +82,15 @@ Install Visual Studio C++ Build Tools with **Desktop development with C++** and 
 ```powershell
 .\analysis\build.ps1
 .\analysis\test.ps1 -CoreOnly
+.\analysis\test_install.ps1
 .\analysis\package.ps1
 ```
 
-The build produces `dist/SelectionTTS/SelectionTTS.dll`. Packaging produces `dist/releases/selection_tts_x64.zip` and its SHA-256 checksum. Choose an empty output directory with `package.ps1 -OutputDirectory <folder>` when creating another package. The build uses the static C++ runtime and does not require ATL.
+The build produces `dist/KorEngTTS/KorEngTTS.dll`. Packaging produces `dist/releases/KorEngTTS_x64.zip` and its SHA-256 checksum. Choose an empty output directory with `package.ps1 -OutputDirectory <folder>` when creating another package. The build uses the static C++ runtime and does not require ATL.
 
 GitHub Actions builds the x64 DLL and runs `-CoreOnly` tests for selection retrieval, decoding, language splitting, text filters, and settings. These tests need no installed voice or audio output. They do not verify speech synthesis or the dialogs in a real editor.
+
+Installer tests use synthetic folders and never start an editor. To also test upgrading from a recognized Selection TTS binary, pass `test_install.ps1 -LegacyDll <old-DLL-path>`.
 
 For speech tests, install both SAPI voices and use a working audio output:
 
@@ -114,10 +119,10 @@ $voice.GetVoices() | ForEach-Object { $_.GetDescription() }
 
 Speech uses the Windows default audio output. A stalled audio device can prevent playback. During local testing, one USB output also stalled an independent SAPI call; another output worked. The plugin does not select a different output or change Windows audio settings.
 
-The plugin does not save selected text or send it to a server. It stores speed and regex settings in `SelectionTTS.ini` in the Notepad++ plugin configuration directory.
+The plugin does not save selected text or send it to a server. It stores speed and regex settings in `KorEngTTS.ini` in the Notepad++ plugin configuration directory.
 
 ## License and credits
 
 This project is licensed under [GPL-3.0-or-later](LICENSE). Include the corresponding source and license when distributing the DLL.
 
-[chcg/SpeechPlugin](https://github.com/chcg/SpeechPlugin) was the starting reference for behavior and Notepad++ API headers. Selection TTS has an independent implementation in `analysis/selection_tts.cpp` and `analysis/speech_core.hpp`. Header provenance and hashes are in [reference/provenance.json](reference/provenance.json). The original Scintilla license is in [reference/scintilla_license.txt](reference/scintilla_license.txt).
+[chcg/SpeechPlugin](https://github.com/chcg/SpeechPlugin) was the starting reference for behavior and Notepad++ API headers. KorEng TTS has an independent implementation in `analysis/selection_tts.cpp` and `analysis/speech_core.hpp`. Header provenance and hashes are in [reference/provenance.json](reference/provenance.json). The original Scintilla license is in [reference/scintilla_license.txt](reference/scintilla_license.txt).
