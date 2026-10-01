@@ -117,7 +117,7 @@ $voice = New-Object -ComObject SAPI.SpVoice
 $voice.GetVoices() | ForEach-Object { $_.GetDescription() }
 ```
 
-Speech uses the Windows default audio output. A stalled audio device can prevent playback. During local testing, one USB output also stalled an independent SAPI call; another output worked. The plugin does not select a different output or change Windows audio settings.
+Speech uses the Windows default audio output. A stalled audio device can prevent playback. The plugin does not select a different output or change Windows audio settings.
 
 The plugin does not save selected text or send it to a server. It stores speed and regex settings in `KorEngTTS.ini` in the Notepad++ plugin configuration directory.
 
